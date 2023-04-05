@@ -1,0 +1,8 @@
+*.csv
+*.json
+*.jar
+*.parquet
+*.ipynb
+*.sh
+*terraform*
+*.tfstate*

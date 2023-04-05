@@ -1,0 +1,36 @@
+[tool.pylint.messages_control]
+
+disable = [
+        "missing-module-docstring",
+        "redefined-outer-name",
+        "duplicate-key",
+        "consider-using-f-string",
+        "invalid-name",
+        "duplicate-code",
+]
+
+good-names = [
+        "project_id",
+        "region",
+        "cluster_name",
+        "job1",
+        "job2",
+        "job3",
+        "job4",
+        "jar_file",
+        "df",
+        "df_full",
+        "df_avg",
+        "df_less",
+        "df_most"]
+
+
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+skip-string-normalization = true
+
+[tool.isort]
+multi_line_output = 3
+length_sort = true

@@ -1,0 +1,3 @@
+prefect
+prefect-gcp[cloud_storage]
+google-cloud-dataproc
