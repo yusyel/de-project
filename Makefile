@@ -6,7 +6,7 @@ prefect_workspace ?=$(shell bash -c 'read -p "prefect_workspace: " prefect_works
 api ?= $(shell bash -c 'read -p "api: " api; echo $$api')
 
 prepare:
-	echo "Create gcs bucket. Block name "google"and gcs bucket must de-project_$(project_id)"
+	echo "Create gcs bucket. Block name "google" and gcs bucket must de-project_$(project_id)"
 	prefect block create gcs-bucket
 	echo "pip install googlemaps">init_script.sh
 	echo "pip install prefect">>init_script.sh

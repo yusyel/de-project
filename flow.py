@@ -4,7 +4,7 @@ from prefect import flow, task
 from prefect_gcp import GcpCredentials
 
 
-@task(name="dataproc_jobs1:web_to_gcs", log_prints=True)
+@task(name="dataproc_jobs1:web_to_gcs", log_prints=True, timeout_seconds=2700, retries=2)
 def dataproc_jobs1(project_id: str, region: str, cluster_name: str, job1: str):
     """dataproc_jobs1 web to gcs"""
     gcp = GcpCredentials.load("gcp-creds")
@@ -25,7 +25,7 @@ def dataproc_jobs1(project_id: str, region: str, cluster_name: str, job1: str):
     return result
 
 
-@task(name="dataproc_jobs2:combining", log_prints=True, timeout_seconds=2700)
+@task(name="dataproc_jobs2:combining", log_prints=True, timeout_seconds=2700, retries=2)
 def dataproc_jobs2(project_id: str, region: str, cluster_name: str, job2: str):
     """dataproc_jobs2 combining all data"""
     gcp = GcpCredentials.load("gcp-creds")
@@ -53,7 +53,7 @@ def dataproc_jobs2(project_id: str, region: str, cluster_name: str, job2: str):
     return result
 
 
-@task(name="dataproc_jobs3:process", log_prints=True, timeout_seconds=2700)
+@task(name="dataproc_jobs3:process", log_prints=True, timeout_seconds=2700, retries=2)
 def dataproc_jobs3(project_id: str, region: str, cluster_name: str, job3: str):
     """dataproc_jobs3 processes data"""
     gcp = GcpCredentials.load("gcp-creds")
@@ -78,7 +78,7 @@ def dataproc_jobs3(project_id: str, region: str, cluster_name: str, job3: str):
     return result
 
 
-@task(name="dataproc_job4:gcs_to_bigquery", log_prints=True, timeout_seconds=2700)
+@task(name="dataproc_job4:gcs_to_bigquery", log_prints=True, timeout_seconds=2700, retries=2)
 def dataproc_jobs4(project_id: str, region: str, cluster_name: str, job4: str, jar_file):
     """dataproc_jobs4 gcs to bigquery"""
     gcp = GcpCredentials.load("gcp-creds")
@@ -105,7 +105,7 @@ def dataproc_jobs4(project_id: str, region: str, cluster_name: str, job4: str, j
     return result
 
 
-@flow(name="main_flow", log_prints=True, timeout_seconds=2700)
+@flow(name="main_flow", log_prints=True, timeout_seconds=2700, retries=2)
 def main():
     """main prefect flow"""
     result = dataproc_jobs1(project_id, region, cluster_name, job1)

@@ -54,7 +54,7 @@ def join(df_full, df_location):
 
 @task(name="write_gcs", log_prints=True)
 def write(df_full, df_location):
-    """writes datas to gcs"""
+    """write data to gcs"""
     print("test1")
     df_full = df_full.write.mode("overwrite").parquet(
         f"gs://de-project_{project_id}/pq/processed/full/"
