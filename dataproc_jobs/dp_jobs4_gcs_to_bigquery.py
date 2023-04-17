@@ -1,7 +1,6 @@
 import argparse
 from prefect import flow, task
 from pyspark.sql import SparkSession
-from pyspark.sql import functions as F
 from pyspark.sql.functions import year, month, hour, avg, col
 
 
@@ -36,13 +35,6 @@ def read_file(input_full: str, input_location: str, spark: SparkSession):
 @task(name="transform", log_prints=True)
 def transform(df_full, df_location):
     """transforms data"""
-    df_full = (
-        df_full.withColumn(
-            "coordinates", F.concat(F.col("latitude"), F.lit(","), F.col("longitude"))
-        )
-        .drop("latitude")
-        .drop("longitude")
-    )
 
     df_avg = (
         df_full.withColumn("year", year(df_full.date_time))
@@ -56,7 +48,7 @@ def transform(df_full, df_location):
             avg("average_speed").alias("avg_average_speed_km_h"),
         )
     )
-
+    print(df_avg.count())
     list1 = (
         df_full.groupBy("geohash")
         .agg(
@@ -97,7 +89,7 @@ def transform(df_full, df_location):
         )
         .filter(df_full.geohash.isin(list1))
     )
-
+    print(df_most.count())
     df_less = (
         df_full.groupBy("geohash", "location", "hour")
         .agg(
@@ -108,25 +100,31 @@ def transform(df_full, df_location):
         )
         .filter(df_full.geohash.isin(list2))
     )
-    print("df_full:", df_full.count())
-    print("df_avg:", df_avg.count())
-    print("df_most:", df_most.count())
-    print("df_less:", df_less.count())
-    return df_full, df_location, df_avg, df_most, df_less
+    print(df_less.count())
+
+    df_district = df_full.groupBy("district", "year").agg(
+        avg("number_of_vehicles").alias("avg_number_of_vehicles"),
+        avg("minimum_speed").alias("avg_minimum_speed_km_h"),
+        avg("maximum_speed").alias("avg_maximum_speed_km_h"),
+        avg("average_speed").alias("avg_average_speed_km_h"),
+    )
+    print("df_district:", df_district.count())
+    return df_full, df_location, df_district, df_avg, df_most, df_less
 
 
-@flow(name="dataproc_jobs4", log_prints=True)
-def write(input_full: str, input_location: str):
-    """writes dataframes to bigquery"""
-    spark = spark_get(project_id)
-    df_full, df_location = read_file(input_full, input_location, spark)
-    df_full, df_location, df_avg, df_most, df_less = transform(df_full, df_location)
+@task(name="write_to_bigquery")
+def write(df_full, df_location, df_district, df_avg, df_most, df_less):
+    """write to bigquery"""
 
     df_full.write.format("bigquery").option("partitionType", "MONTH").option(
         "partitionField", "date_time"
     ).mode("overwrite").option("table", "dataset.reports-full").option(
         "temporaryGcsBucket", f"de-project_{project_id}temp/big"
     ).save()
+
+    df_district.write.format("bigquery").mode("overwrite").option(
+        "table", "dataset.reports-district"
+    ).option("temporaryGcsBucket", f"de-project_{project_id}temp/big").save()
 
     df_location.write.format("bigquery").option("table", "dataset.reports-location").mode(
         "overwrite"
@@ -145,6 +143,15 @@ def write(input_full: str, input_location: str):
     ).option("temporaryGcsBucket", f"de-project_{project_id}temp/big").save()
 
 
+@flow(name="dataproc_jobs4", log_prints=True)
+def main(input_full: str, input_location: str):
+    """writes dataframes to bigquery"""
+    spark = spark_get(project_id)
+    df_full, df_location = read_file(input_full, input_location, spark)
+    df_full, df_location, df_district, df_avg, df_most, df_less = transform(df_full, df_location)
+    write(df_full, df_location, df_district, df_avg, df_most, df_less)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_full", required=True)
@@ -154,4 +161,4 @@ if __name__ == "__main__":
     input_full = args.input_full
     input_location = args.input_location
     project_id = args.project_id
-    write(input_full, input_location)
+    main(input_full, input_location)

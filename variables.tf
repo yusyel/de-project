@@ -22,8 +22,8 @@ variable "services" {
   description ="The list of apis necessary for the project"
   type = list(string)
   default = [
-    "serviceusage.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "serviceusage.googleapis.com",
     "dataproc.googleapis.com",
     "bigquery.googleapis.com",
     "iam.googleapis.com",

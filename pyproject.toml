@@ -7,6 +7,8 @@ disable = [
         "consider-using-f-string",
         "invalid-name",
         "duplicate-code",
+        "redefined-builtin",
+        "too-many-arguments"
 ]
 
 good-names = [

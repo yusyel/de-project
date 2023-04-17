@@ -74,8 +74,6 @@ def union(df_2020, df_2021, df_2022):
     """combining all data"""
     df = df_2020.unionAll(df_2021)
     df_full = df.unionAll(df_2022)
-    print(df_full.count())
-    print(df_full.show())
     return df_full
 
 
@@ -100,7 +98,6 @@ def reorder(df_full):
             "number_of_vehicles",
         )
     )
-    print(df_full.show())
     return df_full
 
 
@@ -111,7 +108,6 @@ def write_gcs(input_2020: str, input_2021: str, input_2022: str):
     df_2020, df_2021, df_2022 = read_df(input_2020, input_2021, input_2022, spark)
     df_full = union(df_2020, df_2021, df_2022)
     df_full = reorder(df_full)
-    print(df_full.show())
     df_full.write.option("header", True).mode("overwrite").parquet(
         f"gs://de-project_{project_id}/pq/pre-processed/"
     )
