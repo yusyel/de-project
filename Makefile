@@ -18,7 +18,7 @@ prepare:
 
 terraform:
 	terraform init
-	terraform apply -var "project_id=$(project_id)" -var "region=$(region)" -var "credentials=/home/yusuf/google/.google/data-eng-382619-a7349a615911.json"
+	terraform apply -var "project_id=$(project_id)" -var "region=$(region)" -var "credentials=/home/yusuf/google/.google/google1.json"
 
 
 

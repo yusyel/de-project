@@ -1,41 +1,77 @@
+import argparse
 from itertools import product
-from pathlib import Path
+from prefect import task, flow
+from pyspark.sql import types
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.functions import hour, month, year
+from pyspark import SparkFiles
 
-import pandas as pd
-from prefect import flow, task
-from prefect_gcp.cloud_storage import GcsBucket
+schema = types.StructType(
+    [
+        types.StructField("DATE_TIME", types.TimestampType(), True),
+        types.StructField("LONGITUDE", types.StringType(), True),
+        types.StructField("LATITUDE", types.StringType(), True),
+        types.StructField("GEOHASH", types.StringType(), True),
+        types.StructField("MINIMUM_SPEED", types.IntegerType(), True),
+        types.StructField("MAXIMUM_SPEED", types.IntegerType(), True),
+        types.StructField("AVERAGE_SPEED", types.IntegerType(), True),
+        types.StructField("NUMBER_OF_VEHICLES", types.IntegerType(), True),
+    ]
+)
 
 
-@task(name="fetch", retries=3)
-def fetch(data_url: str) -> pd.DataFrame:
-    """fetchs data from web"""
-    df = pd.read_csv(data_url)
-    return df
+@task(name="spark_session", retries=3)
+def spark_session() -> SparkSession:
+    """spark session"""
+    spark = (
+        SparkSession.builder.appName("test")
+        .config("spark.sql.broadcastTimeout", "36000")
+        .master("local[*]")
+        .getOrCreate()
+    )
+    spark.conf.set("temporaryGcsBucket", f"gs://de-project_{project_id}temp")
+    return spark
 
 
-@task(name="check", log_prints=True)
-def check(df: pd.DataFrame) -> pd.DataFrame:
-    """Checks null data"""
-    print(df.isnull().sum())
-    print(f"rows: {len(df)}")
-    return df
+@task(name="read")
+def read_from_web(spark, data_url, file_name):
+    """read csv file from web"""
+    spark.sparkContext.addFile(data_url)
+    spark_df = (
+        spark.read.option("sep", ",")
+        .csv("file://" + SparkFiles.get(f"{file_name}.csv"), schema=schema)
+        .cache()
+    )
+    spark_df = spark_df.select([F.col(col).alias(col.lower()) for col in spark_df.columns])
+    spark_df = (
+        spark_df.withColumn("year", year(spark_df.date_time))
+        .withColumn("month", month(spark_df.date_time))
+        .withColumn("hour", hour(spark_df.date_time))
+        .select(
+            "date_time",
+            "year",
+            "month",
+            "hour",
+            "latitude",
+            "longitude",
+            "geohash",
+            "minimum_speed",
+            "maximum_speed",
+            "average_speed",
+            "number_of_vehicles",
+        )
+    )
 
-
-@task(name="write_local", log_prints=True)
-def write_local(df: pd.DataFrame, year: str, file_name: str) -> Path:
-    """writes data local"""
-    Path(f"./raw/{year}").mkdir(parents=True, exist_ok=True)
-    path = Path(f"./raw/{year}/{file_name}.csv")
-    df.to_csv(path, index=False)
-    print(f"path is: {path}")
-    return path
+    return spark_df
 
 
 @task(name="write_gcs", log_prints=True)
-def write_gcs(path: Path) -> None:
-    """uploads data to gcs"""
-    gcs_block = GcsBucket.load("google")
-    gcs_block.upload_from_path(from_path=path, to_path=path, timeout=600)
+def write_to_gcs(spark_df, project_id):
+    """write spark dataframe to gcs bucket with append mode"""
+    spark_df.write.option("header", True).mode("append").parquet(
+        f"gs://de-project_{project_id}/pq/pre-processed/"
+    )
 
 
 @flow(name="dataproc_jobs1", log_prints=True)
@@ -43,12 +79,10 @@ def etl_to_gcs(year: int, month: int) -> None:
     """extract data from web"""
     file_name = f"traffic_density_{year}{month:02}"
     data_url = f"https://github.com/yusyel/de-project/releases/download/{year}/{file_name}.csv"
-
-    df = fetch(data_url)
-    df_clean = check(df)
-    path = write_local(df_clean, year, file_name)
-    write_gcs(path)
-    print(f"{year}, {month},{file_name}, is saved GCS:{path} location")
+    spark = spark_session()
+    spark_df = read_from_web(spark, data_url, file_name)
+    write_to_gcs(spark_df, project_id)
+    print(f"{year}, {month},{file_name}, is saved")
 
 
 @flow(name="dataproc_jobs1:parent_flow", log_prints=True)
@@ -60,6 +94,10 @@ def etl_parent_flow(years, months):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--project_id", required=True)
+    args = parser.parse_args()
+    project_id = args.project_id
     years = [2020, 2021, 2022]
     months = range(1, 13)
     etl_parent_flow(years, months)

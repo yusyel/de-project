@@ -12,7 +12,7 @@ def spark_get(project_id: str):
         .config("spark.sql.broadcastTimeout", "36000")
         .getOrCreate()
     )
-    spark.conf.set("temporaryGcsBucket", f"gs://de-project_{project_id}/temp")
+    spark.conf.set("temporaryGcsBucket", f"gs://de-project_{project_id}temp")
     return spark
 
 
@@ -143,7 +143,7 @@ def write(df_full, df_location, df_district, df_avg, df_most, df_less):
     ).option("temporaryGcsBucket", f"de-project_{project_id}temp/big").save()
 
 
-@flow(name="dataproc_jobs4", log_prints=True)
+@flow(name="dataproc_jobs3", log_prints=True)
 def main(input_full: str, input_location: str):
     """writes dataframes to bigquery"""
     spark = spark_get(project_id)

@@ -133,7 +133,9 @@ master_config {
     software_config {
       image_version = "2.0.35-debian10"
       override_properties = {
-        "dataproc:dataproc.allow.zero.workers" = "true"
+        "dataproc:dataproc.allow.zero.workers" = "true",
+        "core:fs.gs.glob.flatlist.enable" = "false",
+        "core:fs.gs.glob.concurrent.enable" = "false"
       }
     }
     # You can define multiple initialization_action blocks
@@ -148,7 +150,3 @@ master_config {
     google_storage_bucket_object.dataproc_jobs
   ]
 }
-
-# BIGQUERY DATASET
-
-#DATAPROC MACHINE

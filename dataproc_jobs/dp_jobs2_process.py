@@ -32,8 +32,16 @@ def read(input_pq: str, spark: SparkSession):
     df_location = df_full.groupBy("geohash").agg(
         avg("latitude").alias("latitude"), avg("longitude").alias("longitude")
     )
+    df_location = (
+        df_location.withColumn(
+            "coordinates", F.concat(F.col("latitude"), F.lit(","), F.col("longitude"))
+        )
+        .drop("latitude")
+        .drop("longitude")
+    )
     print("df_location count:", df_location.count())
-    print("df_location cloums:", df_location.columns)
+    print("df_location columns:", df_location.columns)
+    print(df_location.dtypes)
 
     return df_full, df_location
 
@@ -42,25 +50,20 @@ def read(input_pq: str, spark: SparkSession):
 def location(df_location):
     """get location"""
 
-    def get_location(latitude: int, longitude: int):
+    def get_location(coordinates: str):
         """gets full address from google maps api"""
         gmaps = googlemaps.Client(key=KEY)
-        result = gmaps.reverse_geocode((latitude, longitude))
+        result = gmaps.reverse_geocode((coordinates))
         address = result[0]['formatted_address']
         return address
 
-    print(get_location(41.1135864257812, 28.8446044921875))
+    # test
+    x = "41.1135864257812, 28.8446044921875"
+    print(get_location(x))
     get_func = F.udf(get_location, returnType=types.StringType())
-    print(df_location.count())
-    df_location = df_location.withColumn(
-        "location", get_func(df_location.latitude, df_location.longitude)
-    )
-    df_location = (
-        df_location.withColumn(
-            "coordinates", F.concat(F.col("latitude"), F.lit(","), F.col("longitude"))
-        )
-        .drop("latitude")
-        .drop("longitude")
+    print(df_location.coordinates)
+    df_location = df_location.na.drop("any").withColumn(
+        "location", get_func(df_location.coordinates)
     )
     return df_location
 
@@ -111,7 +114,6 @@ def district(df_location, spark: SparkSession):
     ]
     list = spark.createDataFrame(list, types.StringType())
     district = list.withColumn("district", list.value).drop(list.value)
-    district.show()
     df_location = district.join(
         df_location, df_location.location.contains(district.district), "inner"
     )
@@ -127,7 +129,6 @@ def join(df_full, df_location):
         .drop(df_full.latitude)
         .drop(df_full.longitude)
     )
-
     print("test")
     return df_full, df_location
 
@@ -147,13 +148,11 @@ def write(df_full, df_location):
     return df_full, df_location
 
 
-@flow(name="dataproc_jobs3", log_prints=True)
+@flow(name="dataproc_jobs2", log_prints=True)
 def main_flow(input_pq: str):
     """main flow"""
     spark = spark_get(project_id)
     df_full, df_location = read(input_pq, spark)
-    df_location.show()
-    df_location.count()
     df_location = location(df_location)
     df_location = district(df_location, spark)
     df_full, df_location = join(df_full, df_location)
