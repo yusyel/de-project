@@ -4,56 +4,28 @@ from prefect import flow, task
 from prefect_gcp import GcpCredentials
 
 
-# @task(name="dataproc_jobs1:web_to_gcs", log_prints=True, timeout_seconds=2700)
-# def dataproc_jobs1(project_id: str, region: str, cluster_name: str, job1: str):
-# """dataproc_jobs1 web to gcs"""
-# gcp = GcpCredentials.load("gcp-creds")
-# job_client = dp.JobControllerClient(
-# credentials=gcp.get_credentials_from_service_account(),
-# client_options={"api_endpoint": "{}-dataproc.googleapis.com:443".format(region)},
-# )
-# jobs = {
-# "reference": {"job_id": "custom_job_id"},
-# "placement": {"cluster_name": cluster_name},
-# "reference": {"project_id": project_id},
-# "pyspark_job": {
-# "main_python_file_uri": job1,
-# "args":{f"--project_id={project_id}"},
-# },
-# }
-# res = job_client.submit_job_as_operation(project_id=project_id, region=region, job=jobs)
-# result = res.result()
-# return result
+@task(name="dataproc_jobs1:web_to_gcs", log_prints=True, timeout_seconds=2700)
+def dataproc_jobs1(project_id: str, region: str, cluster_name: str, job1: str):
+    """dataproc_jobs1 web to gcs"""
+    gcp = GcpCredentials.load("gcp-creds")
+    job_client = dp.JobControllerClient(
+        credentials=gcp.get_credentials_from_service_account(),
+        client_options={"api_endpoint": "{}-dataproc.googleapis.com:443".format(region)},
+    )
+    jobs = {
+        "reference": {"job_id": "custom_job_id"},
+        "placement": {"cluster_name": cluster_name},
+        "reference": {"project_id": project_id},
+        "pyspark_job": {"main_python_file_uri": job1, "args": {f"--project_id={project_id}"}},
+    }
+    res = job_client.submit_job_as_operation(project_id=project_id, region=region, job=jobs)
+    result = res.result()
+    return result
 
 
-# @task(name="dataproc_jobs2:process", log_prints=True, timeout_seconds=2700)
-# def dataproc_jobs2(project_id: str, region: str, cluster_name: str, job3: str):
-# """dataproc_jobs3 processes data"""
-# gcp = GcpCredentials.load("gcp-creds")
-# job_client = dp.JobControllerClient(
-# credentials=gcp.get_credentials_from_service_account(),
-# client_options={"api_endpoint": "{}-dataproc.googleapis.com:443".format(region)},
-# )
-# jobs = {
-# "reference": {"job_id": "custom_job_id"},
-# "placement": {"cluster_name": cluster_name},
-# "reference": {"project_id": project_id},
-# "pyspark_job": {
-# "main_python_file_uri": job3,
-# "args": {
-# f"--input_pq=gs://de-project_{project_id}/pq/pre-processed/",
-# f"--project_id={project_id}",
-# },
-# },
-# }
-# res = job_client.submit_job_as_operation(project_id=project_id, region=region, job=jobs)
-# result = res.result()
-# return result
-
-
-@task(name="dataproc_job3:gcs_to_bigquery", log_prints=True, timeout_seconds=2700)
-def dataproc_jobs3(project_id: str, region: str, cluster_name: str, job4: str, jar_file):
-    """dataproc_jobs4 gcs to bigquery"""
+@task(name="dataproc_jobs2:combining", log_prints=True, timeout_seconds=2700)
+def dataproc_jobs2(project_id: str, region: str, cluster_name: str, job2: str):
+    """dataproc_jobs2 processes data"""
     gcp = GcpCredentials.load("gcp-creds")
     job_client = dp.JobControllerClient(
         credentials=gcp.get_credentials_from_service_account(),
@@ -64,7 +36,32 @@ def dataproc_jobs3(project_id: str, region: str, cluster_name: str, job4: str, j
         "placement": {"cluster_name": cluster_name},
         "reference": {"project_id": project_id},
         "pyspark_job": {
-            "main_python_file_uri": job4,
+            "main_python_file_uri": job2,
+            "args": {
+                f"--input_pq=gs://de-project_{project_id}/pq/pre-processed/",
+                f"--project_id={project_id}",
+            },
+        },
+    }
+    res = job_client.submit_job_as_operation(project_id=project_id, region=region, job=jobs)
+    result = res.result()
+    return result
+
+
+@task(name="dataproc_job3:gcs_to_bigquery", log_prints=True, timeout_seconds=2700)
+def dataproc_jobs3(project_id: str, region: str, cluster_name: str, job3: str, jar_file):
+    """dataproc_jobs3 gcs to bigquery"""
+    gcp = GcpCredentials.load("gcp-creds")
+    job_client = dp.JobControllerClient(
+        credentials=gcp.get_credentials_from_service_account(),
+        client_options={"api_endpoint": "{}-dataproc.googleapis.com:443".format(region)},
+    )
+    jobs = {
+        "reference": {"job_id": "custom_job_id"},
+        "placement": {"cluster_name": cluster_name},
+        "reference": {"project_id": project_id},
+        "pyspark_job": {
+            "main_python_file_uri": job3,
             "args": {
                 f"--input_full=gs://de-project_{project_id}/pq/processed/full/*/",
                 f"--input_location=gs://de-project_{project_id}/pq/processed/location/",
@@ -81,10 +78,10 @@ def dataproc_jobs3(project_id: str, region: str, cluster_name: str, job4: str, j
 @flow(name="main_flow", log_prints=True, timeout_seconds=2700)
 def main():
     """main prefect flow"""
-    # result = dataproc_jobs1(project_id, region, cluster_name, job1)
-    # print(result)
-    # result = dataproc_jobs2(project_id, region, cluster_name, job2)
-    # print(result)
+    result = dataproc_jobs1(project_id, region, cluster_name, job1)
+    print(result)
+    result = dataproc_jobs2(project_id, region, cluster_name, job2)
+    print(result)
     result = dataproc_jobs3(project_id, region, cluster_name, job3, jar_file)
     print(result)
 
