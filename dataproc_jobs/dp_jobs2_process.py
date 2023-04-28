@@ -90,7 +90,7 @@ def district(df_location, spark: SparkSession):
         "Çekmeköy/İstanbul, Türkiye",
         "Esenler/İstanbul, Türkiye",
         "Esenyurt/İstanbul, Türkiye",
-        "Eyüp/İstanbul, Türkiye",
+        "Eyüpsultan/İstanbul, Türkiye",
         "Fatih/İstanbul, Türkiye",
         "Gaziosmanpaşa/İstanbul, Türkiye",
         "Güngören/İstanbul, Türkiye",
@@ -117,6 +117,7 @@ def district(df_location, spark: SparkSession):
     df_location = district.join(
         df_location, df_location.location.contains(district.district), "inner"
     )
+    df_location.count()
     return df_location
 
 
@@ -130,22 +131,18 @@ def join(df_full, df_location):
         .drop(df_full.longitude)
     )
     print("test")
-    return df_full, df_location
+    return df_full
 
 
 @task(name="write_gcs", log_prints=True)
-def write(df_full, df_location):
+def write(df_full):
     """write data to gcs"""
     print("test1")
     df_full = df_full.write.mode("overwrite").parquet(
         f"gs://de-project_{project_id}/pq/processed/full/"
     )
-    print("test2")
-    df_location = df_location.write.mode("overwrite").parquet(
-        f"gs://de-project_{project_id}/pq/processed/location/"
-    )
 
-    return df_full, df_location
+    return df_full
 
 
 @flow(name="dataproc_jobs2", log_prints=True)
@@ -155,8 +152,8 @@ def main_flow(input_pq: str):
     df_full, df_location = read(input_pq, spark)
     df_location = location(df_location)
     df_location = district(df_location, spark)
-    df_full, df_location = join(df_full, df_location)
-    df_full, df_location = write(df_full, df_location)
+    df_full = join(df_full, df_location)
+    df_full = write(df_full)
     return df_full, df_location
 
 

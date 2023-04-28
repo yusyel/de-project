@@ -23,7 +23,7 @@ def dataproc_jobs1(project_id: str, region: str, cluster_name: str, job1: str):
     return result
 
 
-@task(name="dataproc_jobs2:combining", log_prints=True, timeout_seconds=2700)
+@task(name="dataproc_jobs2:processes", log_prints=True, timeout_seconds=2700)
 def dataproc_jobs2(project_id: str, region: str, cluster_name: str, job2: str):
     """dataproc_jobs2 processes data"""
     gcp = GcpCredentials.load("gcp-creds")
@@ -64,7 +64,6 @@ def dataproc_jobs3(project_id: str, region: str, cluster_name: str, job3: str, j
             "main_python_file_uri": job3,
             "args": {
                 f"--input_full=gs://de-project_{project_id}/pq/processed/full/*/",
-                f"--input_location=gs://de-project_{project_id}/pq/processed/location/",
                 f"--project_id={project_id}",
             },
             "jar_file_uris": jar_file,

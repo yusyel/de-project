@@ -37,9 +37,8 @@ variable "files" {
   default = {
     # sourcefile = destfile
     "./dataproc_jobs/dp_jobs1_web_to_gcs.py" = "dataproc_jobs/dp_jobs1_web_to_gcs.py"
-    "./dataproc_jobs/dp_jobs2_union_all.py" = "dataproc_jobs/dp_jobs2_union_all.py"
-    "./dataproc_jobs/dp_jobs3_process.py" = "dataproc_jobs/dp_jobs3_process.py"
-    "./dataproc_jobs/dp_jobs4_gcs_to_bigquery.py" = "dataproc_jobs/dp_jobs4_gcs_to_bigquery.py"
+    "./dataproc_jobs/dp_jobs2_process.py" = "dataproc_jobs/dp_jobs2_process.py"
+    "./dataproc_jobs/dp_jobs3_gcs_to_bigquery.py" = "dataproc_jobs/dp_jobs3_gcs_to_bigquery.py"
     "./init_script.sh" = "script/init_script.sh"
   }
 }
