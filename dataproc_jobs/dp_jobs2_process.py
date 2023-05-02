@@ -118,6 +118,7 @@ def district(df_location, spark: SparkSession):
         df_location, df_location.location.contains(district.district), "inner"
     )
     df_location.count()
+
     return df_location
 
 
@@ -154,6 +155,7 @@ def main_flow(input_pq: str):
     df_location = district(df_location, spark)
     df_full = join(df_full, df_location)
     df_full = write(df_full)
+
     return df_full, df_location
 
 
