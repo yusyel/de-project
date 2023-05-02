@@ -102,11 +102,19 @@ def transform(df_full):
     df_location = df_full.groupBy("location").count()
     print("df_location count:", df_location.count())
 
-    return df_full, df_district, df_avg, df_most, df_less, df_location
+    df_overall = df_full.groupBy("year").agg(
+        avg("number_of_vehicles").alias("avg_number_of_vehicles"),
+        avg("minimum_speed").alias("avg_minimum_speed_km_h"),
+        avg("maximum_speed").alias("avg_maximum_speed_km_h"),
+        avg("average_speed").alias("avg_average_speed_km_h"),
+    )
+    print("df_overall count:", df_overall.count())
+
+    return df_full, df_district, df_avg, df_most, df_less, df_location, df_overall
 
 
 @task(name="write_to_bigquery")
-def write(df_full, df_district, df_avg, df_most, df_less, df_location):
+def write(df_full, df_district, df_avg, df_most, df_less, df_location, df_overall):
     """write to bigquery"""
 
     df_full.write.format("bigquery").option("partitionType", "MONTH").option(
@@ -135,14 +143,18 @@ def write(df_full, df_district, df_avg, df_most, df_less, df_location):
         "table", "dataset.reports-location"
     ).option("temporaryGcsBucket", f"de-project_{project_id}temp/big").save()
 
+    df_overall.write.format("bigquery").mode("overwrite").option(
+        "table", "dataset.reports-overall"
+    ).option("temporaryGcsBucket", f"de-project_{project_id}temp/big").save()
+
 
 @flow(name="dataproc_jobs3", log_prints=True)
 def main(input_full: str):
     """writes dataframes to bigquery"""
     spark = spark_get(project_id)
     df_full = read_file(input_full, spark)
-    df_full, df_district, df_avg, df_most, df_less, df_location = transform(df_full)
-    write(df_full, df_district, df_avg, df_most, df_less, df_location)
+    df_full, df_district, df_avg, df_most, df_less, df_location, df_overall = transform(df_full)
+    write(df_full, df_district, df_avg, df_most, df_less, df_location, df_overall)
 
 
 if __name__ == "__main__":
