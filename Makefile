@@ -31,6 +31,3 @@ terraform:
 
 flow:
 	python3 flow.py --project_id=$(project_id) --region=$(region)
-
-
-run: prepare terraform flow

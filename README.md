@@ -98,9 +98,15 @@ With terraform this resources will be created:
 * Google dataproc cluster
 * Enabling Necessary APIs
 * Upload dataproc job scripts and initialization script to cloud storage
-*
+
 
 ```bash
 make flow
 ```
 Make flow command will be prompt GCP project id and region. After that prefect flow will be trigger dataproc job scripts using google cloud python library. Whole ETL pipeline running on GCP dataproc cluster machine.
+
+Dataproc Jobs:
+
+* Dataproc Job 1: This is web to cloud storage script. Fetches data from web, turns pyspark dataframe and transform necessary changes
+* Dataproc Job 2: This is process script. Takes all data from cloud storage, process data and saves to cloud storage.
+* Dataproc Job 3: This is transform script. Takes processed data from cloud storage and transform data for reporting and saves to bigquery.
