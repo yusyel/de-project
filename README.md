@@ -18,6 +18,8 @@ Here is raw data sample:
 
 For processing data I've extracted hours, month  and year information from timestamp column and saved as individuals columns. Google looker studio accept geographic locations with "(latitude, longitude)" as format. I've concatenated latitude and logitude columns. Unfortunately data source does not provide geohash counterparts. For getting locations address I used google maps python library and saved location addresses another column. Istanbul has 39 district. For comparing each district I've extracted district information from address column. With processed data I can compare each hour, each month for 3 year.
 
+Here is processed data:
+
 
 
 |          date_time|year|month|hour|minimum_speed|maximum_speed|average_speed|number_of_vehicles|            district|geohash|         coordinates|            location|
@@ -69,7 +71,7 @@ Running project pretty easy with makefile. You can follow instructions:
 
 
 
-
+### Instructions
 ```bash
 git clone git@github.com:yusyel/de-project.git
 ```
@@ -79,7 +81,7 @@ After cloning github repo make sure you activate python environment.
 ```bash
 make install
 ```
-Make install command will be install prefect, prefect-gcp and google.cloud packages.
+Make install command will be install prefect, prefect-gcp and google cloud  python packages.
 
 ```bash
 make prepare
@@ -103,9 +105,9 @@ With terraform this resources will be created:
 ```bash
 make flow
 ```
-Make flow command will be prompt GCP project id and region. After that prefect flow will be trigger dataproc job scripts using google cloud python library. Whole ETL pipeline running on GCP dataproc cluster machine.
+Make flow command will be prompt GCP project id and region. After that prefect flow will be trigger dataproc job scripts using google cloud python library. Whole ETL pipeline is running on GCP dataproc cluster machine.
 
-Dataproc Jobs:
+#### Dataproc Jobs:
 
 * Dataproc Job 1: This is web to cloud storage script. Fetches data from web, turns pyspark dataframe and transform necessary changes
 * Dataproc Job 2: This is process script. Takes all data from cloud storage, process data and saves to cloud storage.
