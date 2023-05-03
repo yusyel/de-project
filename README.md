@@ -4,7 +4,7 @@ This project is requirement of data engineering zoomcamp. Building cloud service
 
 ## Project info
 
-In this project we are looking Istanbul traffic density. The data I used in the project was published by Istanbul City Hall open data platform. The content of the data is the traffic density of 5014 unique locations. Data was collected hourly for 3 (2019,2021,2022) years. Comparing the hours of the day, month and years and visualize locations on the looker dashboard with google maps integrations.
+In this project we are looking Istanbul traffic density. The data I used was published by Istanbul City Hall open data platform. The content of the data is the traffic density of 5014 unique locations. Data was collected hourly for 3 (2019,2021,2022) years. Comparing the hours of the day, month and years and visualize locations on the looker dashboard with google maps integrations.
 Here is raw data sample:
 
 | date_time 	    | longitude 	 | latitude 	  | geohash 	| minimum_speed 	| maximum_speed 	| average_speed 	| number_of_vehicles 	|
@@ -43,3 +43,64 @@ District dataframe: With this dataframe I grouped district, year and month colum
 * Data Dashboard: Google Looker Studio
 * Orchestrating: Prefect and Prefect Cloud
 * Frameworks: Spark, Pyspark jobs
+* Infrastructure as code tool: Terraform
+
+## Running project
+
+Running project pretty easy with makefile. You can follow instructions:
+
+### Requirements
+- Google cloud Service account key
+- Prefect Cloud account
+- Terraform
+### Requirement Details
+* GCP Service account must have this roles:
+    - BigQuery Admin
+    - Dataproc Administrator
+    - Service Account User
+    - Service Usage Admin
+    - Storage Admin
+    - Storage Object Admin
+    - Google Maps API Key: -> https://console.cloud.google.com/projectselector2/google/maps-apis/credentials?utm_source=Docs_Credentials
+
+* Prefect Cloud account:
+    - Prefect API key -> https://app.prefect.cloud/my/profile
+    - Prefect Workspace -> https://app.prefect.cloud/workspaces/create
+
+
+
+
+```bash
+git clone git@github.com:yusyel/de-project.git
+```
+
+After cloning github repo make sure you activate python environment.
+
+```bash
+make install
+```
+Make install command will be install prefect, prefect-gcp and google.cloud packages.
+
+```bash
+make prepare
+```
+Make prepare command will be prompt prefect_key, prefect_workspace and google maps api key. After entering all variables make file will be create initialization script for GCP Dataproc that contains prefect_key, prefect_workspace id and google maps api.
+
+```bash
+make terraform
+```
+Make terraform command  will be initialization terraform and prompt GCP project id,  region and GCP service account key location.
+
+With terraform this resources will be created:
+
+* Google cloud storage
+* Google bigquery dataset
+* Google dataproc cluster
+* Enabling Necessary APIs
+* Upload dataproc job scripts and initialization script to cloud storage
+*
+
+```bash
+make flow
+```
+Make flow command will be prompt GCP project id and region. After that prefect flow will be trigger dataproc job scripts using google cloud python library. Whole ETL pipeline running on GCP dataproc cluster machine.

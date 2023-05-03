@@ -16,7 +16,7 @@ provider "google" {
 
 
 
-#services
+// Enabling necessary apis
 resource "google_project_service" "services" {
   for_each = toset(var.services)
   project                    = var.project_id
@@ -54,7 +54,7 @@ resource "google_storage_bucket" "de_zoomcamp" {
   }
 
 }
-
+// GCS Temp Bucket
 resource "google_storage_bucket" "de_zoomcamp2" {
   name          = "${local.de-project}_${var.project_id}temp"
   location      = var.region
@@ -80,7 +80,7 @@ resource "google_storage_bucket" "de_zoomcamp2" {
 
 }
 
-
+// Bigquery dataset
 resource "google_bigquery_dataset" "dataset" {
   dataset_id = var.bq_dataset
   project    = var.project_id
@@ -88,9 +88,6 @@ resource "google_bigquery_dataset" "dataset" {
 }
 
 # GCS BUCKET UPLOAD SCRIPT
-
-
-
 resource "google_storage_bucket_object" "dataproc_jobs" {
   for_each = var.files
   name     = each.value
@@ -100,6 +97,8 @@ resource "google_storage_bucket_object" "dataproc_jobs" {
     google_storage_bucket.de_zoomcamp
   ]
 }
+
+
 #darapoc machine
 resource "google_dataproc_cluster" "cluster"{
   name     = "cluster"
