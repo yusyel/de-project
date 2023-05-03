@@ -102,7 +102,7 @@ def transform(df_full):
     df_location = df_full.groupBy("location").count()
     print("df_location count:", df_location.count())
 
-    df_overall = df_full.groupBy("year").agg(
+    df_overall = df_full.groupBy("year", "month").agg(
         avg("number_of_vehicles").alias("avg_number_of_vehicles"),
         avg("minimum_speed").alias("avg_minimum_speed_km_h"),
         avg("maximum_speed").alias("avg_maximum_speed_km_h"),
