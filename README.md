@@ -1,6 +1,6 @@
 # Istanbul Traffic Density | Data Engineering Zoomcamp
 
-This project is requirement of data engineering zoomcamp. Building cloud services infrastructure, creating data ingestion pipeline, transforming data and as a reporting creating data dashboard.
+This project is requirement of [Data Engineering Zoomcamp](https://github.com/DataTalksClub/data-engineering-zoomcamp). Building cloud services infrastructure, creating data ingestion pipeline, transforming data and as a reporting creating data dashboard.
 
 ## Project info
 
