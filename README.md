@@ -116,7 +116,7 @@ make flow
 Make flow command will be prompt GCP project id and region. After that prefect flow will be trigger dataproc job scripts using google cloud python library. Whole ETL pipeline is running on GCP dataproc cluster machine.
 
 ## Dashboard
-
+Google Looker Studio dashboard [report.](https://lookerstudio.google.com/reporting/49a43be5-0939-42b5-8028-15e5fab3253a)
 
 ![Diagram](./img/dashboard_1.png)
 ![Diagram](./img/dashboard_2.png)
