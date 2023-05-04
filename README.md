@@ -4,7 +4,7 @@ This project is requirement of [Data Engineering Zoomcamp](https://github.com/Da
 
 ## Project info
 
-In this project we are looking Istanbul traffic density. The data I used was published by Istanbul City Hall open data platform. The content of the data is the traffic density of 5014 unique locations. Data was collected hourly for 3 (2019,2021,2022) years. Total data volume is 13.92 GB. In this project I will comparing the hours of the day, month and years and visualize locations on the looker dashboard with google maps integrations.
+In this project we are looking Istanbul traffic density. The data I used was published by Istanbul City Hall open data platform. The content of the data is the traffic density of 5014 unique locations. Data was collected hourly for 3 (2019,2021,2022) year. Total data volume is 13.92 GB. In this project I will comparing the hours of the day, month and years and visualize locations on the looker dashboard with google maps integrations.
 Here is raw data sample:
 
 | date_time 	    | longitude 	 | latitude 	  | geohash 	| minimum_speed 	| maximum_speed 	| average_speed 	| number_of_vehicles 	|
