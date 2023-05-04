@@ -118,5 +118,5 @@ Make flow command will be prompt GCP project id and region. After that prefect f
 ## Dashboard
 
 
-![Diagram](./img/dashboard1.png)
-![Diagram](./img/dashboard2.png)
+![Diagram](./img/dashboard_1.png)
+![Diagram](./img/dashboard_2.png)
