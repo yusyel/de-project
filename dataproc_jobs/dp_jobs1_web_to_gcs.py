@@ -10,8 +10,8 @@ from pyspark import SparkFiles
 schema = types.StructType(
     [
         types.StructField("DATE_TIME", types.TimestampType(), True),
-        types.StructField("LONGITUDE", types.StringType(), True),
-        types.StructField("LATITUDE", types.StringType(), True),
+        types.StructField("LONGITUDE", types.FloatType(), True),
+        types.StructField("LATITUDE", types.FloatType(), True),
         types.StructField("GEOHASH", types.StringType(), True),
         types.StructField("MINIMUM_SPEED", types.IntegerType(), True),
         types.StructField("MAXIMUM_SPEED", types.IntegerType(), True),

@@ -30,15 +30,16 @@ def read_file(input_full: str, spark: SparkSession):
 def transform(df_full):
     """transforms data"""
 
-    df_avg = df_full.groupBy("coordinates", "hour", "month", "year").agg(
+    df_avg = df_full.groupBy("coordinates", "location", "hour", "month", "year").agg(
         avg("number_of_vehicles").alias("avg_number_of_vehicles"),
         avg("minimum_speed").alias("avg_minimum_speed_km_h"),
         avg("maximum_speed").alias("avg_maximum_speed_km_h"),
         avg("average_speed").alias("avg_average_speed_km_h"),
     )
     print("df_avg count", df_avg.count())
-    list1 = (
-        df_full.groupBy("geohash")
+
+    list = (
+        df_full.groupBy("district")
         .agg(
             avg("number_of_vehicles").alias("avg_number_of_vehicles"),
             avg("minimum_speed").alias("avg_minimum_speed"),
@@ -46,52 +47,25 @@ def transform(df_full):
             avg("average_speed").alias("avg_average_speed"),
         )
         .orderBy(col("avg_number_of_vehicles").desc())
-        .limit(100)
-        .select("geohash")
-        .rdd.flatMap(lambda x: x)
-        .collect()
-    )
-
-    list2 = (
-        df_full.groupBy("geohash")
-        .agg(
-            avg("number_of_vehicles").alias("avg_number_of_vehicles"),
-            avg("minimum_speed").alias("avg_minimum_speed"),
-            avg("maximum_speed").alias("avg_maximum_speed"),
-            avg("average_speed").alias("avg_average_speed"),
-        )
-        .orderBy(col("avg_number_of_vehicles").asc())
-        .limit(100)
-        .select("geohash")
+        .limit(5)
+        .select("district")
         .rdd.flatMap(lambda x: x)
         .collect()
     )
 
     df_most = (
-        df_full.groupBy("geohash", "location", "hour")
+        df_full.groupBy("location", "year")
         .agg(
             avg("number_of_vehicles").alias("avg_number_of_vehicles"),
             avg("minimum_speed").alias("avg_minimum_speed"),
             avg("maximum_speed").alias("avg_maximum_speed"),
             avg("average_speed").alias("avg_average_speed"),
         )
-        .filter(df_full.geohash.isin(list1))
+        .filter(df_full.district.isin(list))
     )
     print("df_most count:", df_most.count())
 
-    df_less = (
-        df_full.groupBy("geohash", "location", "hour")
-        .agg(
-            avg("number_of_vehicles").alias("avg_number_of_vehicles"),
-            avg("minimum_speed").alias("avg_minimum_speed"),
-            avg("maximum_speed").alias("avg_maximum_speed"),
-            avg("average_speed").alias("avg_average_speed"),
-        )
-        .filter(df_full.geohash.isin(list2))
-    )
-    print("df_less count:", df_less.count())
-
-    df_district = df_full.groupBy("district", "year").agg(
+    df_district = df_full.groupBy("district", "month", "year").agg(
         avg("number_of_vehicles").alias("avg_number_of_vehicles"),
         avg("minimum_speed").alias("avg_minimum_speed_km_h"),
         avg("maximum_speed").alias("avg_maximum_speed_km_h"),
@@ -110,11 +84,11 @@ def transform(df_full):
     )
     print("df_overall count:", df_overall.count())
 
-    return df_full, df_district, df_avg, df_most, df_less, df_location, df_overall
+    return df_full, df_district, df_avg, df_most, df_location, df_overall
 
 
 @task(name="write_to_bigquery")
-def write(df_full, df_district, df_avg, df_most, df_less, df_location, df_overall):
+def write(df_full, df_district, df_avg, df_most, df_location, df_overall):
     """write to bigquery"""
 
     df_full.write.format("bigquery").option("partitionType", "MONTH").option(
@@ -132,11 +106,7 @@ def write(df_full, df_district, df_avg, df_most, df_less, df_location, df_overal
     ).save()
 
     df_most.write.format("bigquery").mode("overwrite").option(
-        "table", "dataset.reports-less"
-    ).option("temporaryGcsBucket", f"de-project_{project_id}temp/big").save()
-
-    df_less.write.format("bigquery").mode("overwrite").option(
-        "table", "dataset.reports-less"
+        "table", "dataset.reports-most"
     ).option("temporaryGcsBucket", f"de-project_{project_id}temp/big").save()
 
     df_location.write.format("bigquery").mode("overwrite").option(
@@ -153,8 +123,8 @@ def main(input_full: str):
     """writes dataframes to bigquery"""
     spark = spark_get(project_id)
     df_full = read_file(input_full, spark)
-    df_full, df_district, df_avg, df_most, df_less, df_location, df_overall = transform(df_full)
-    write(df_full, df_district, df_avg, df_most, df_less, df_location, df_overall)
+    df_full, df_district, df_avg, df_most, df_location, df_overall = transform(df_full)
+    write(df_full, df_district, df_avg, df_most, df_location, df_overall)
 
 
 if __name__ == "__main__":

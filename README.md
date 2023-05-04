@@ -4,7 +4,7 @@ This project is requirement of data engineering zoomcamp. Building cloud service
 
 ## Project info
 
-In this project we are looking Istanbul traffic density. The data I used was published by Istanbul City Hall open data platform. The content of the data is the traffic density of 5014 unique locations. Data was collected hourly for 3 (2019,2021,2022) years. Comparing the hours of the day, month and years and visualize locations on the looker dashboard with google maps integrations.
+In this project we are looking Istanbul traffic density. The data I used was published by Istanbul City Hall open data platform. The content of the data is the traffic density of 5014 unique locations. Data was collected hourly for 3 (2019,2021,2022) years. Total data volume is 13.92 GB. In this project I will comparing the hours of the day, month and years and visualize locations on the looker dashboard with google maps integrations.
 Here is raw data sample:
 
 | date_time 	    | longitude 	 | latitude 	  | geohash 	| minimum_speed 	| maximum_speed 	| average_speed 	| number_of_vehicles 	|
@@ -36,6 +36,14 @@ Average dataframe: With this dataframe I grouped coordinates, hour, month and ye
 
 District dataframe: With this dataframe I grouped district, year and month colums. While grouping calculated average of all numeric variables for each group. Months and years can be visualized as time series for each district.
 
+## Project Architecture
+![Diagram](./img/diagram.png)
+
+### Dataproc Jobs:
+
+* Dataproc Job 1: This is web to cloud storage script. Fetches data from web, turns pyspark dataframe and transform necessary changes
+* Dataproc Job 2: This is process script. Takes all data from cloud storage, process data and saves to cloud storage.
+* Dataproc Job 3: This is transform script. Takes processed data from cloud storage and transform data for reporting and saves to bigquery.
 
 ## Technology Stack:
 
@@ -52,8 +60,8 @@ District dataframe: With this dataframe I grouped district, year and month colum
 Running project pretty easy with makefile. You can follow instructions:
 
 ### Requirements
-- Google cloud Service account key
-- Prefect Cloud account
+- Google Cloud Service Account key
+- Prefect Cloud Account
 - Terraform
 ### Requirement Details
 * GCP Service account must have this roles:
@@ -65,7 +73,7 @@ Running project pretty easy with makefile. You can follow instructions:
     - Storage Object Admin
     - Google Maps API Key: -> https://console.cloud.google.com/projectselector2/google/maps-apis/credentials?utm_source=Docs_Credentials
 
-* Prefect Cloud account:
+* Prefect Cloud Count:
     - Prefect API key -> https://app.prefect.cloud/my/profile
     - Prefect Workspace -> https://app.prefect.cloud/workspaces/create
 
@@ -95,11 +103,11 @@ Make terraform command  will be initialization terraform and prompt GCP project 
 
 With terraform this resources will be created:
 
-* Google cloud storage
-* Google bigquery dataset
-* Google dataproc cluster
+* Google Cloud Storage
+* Google Bigquery Dataset
+* Google Dataproc Cluster
 * Enabling Necessary APIs
-* Upload dataproc job scripts and initialization script to cloud storage
+* Transfer dataproc job scripts and initialization script to cloud storage
 
 
 ```bash
@@ -107,8 +115,8 @@ make flow
 ```
 Make flow command will be prompt GCP project id and region. After that prefect flow will be trigger dataproc job scripts using google cloud python library. Whole ETL pipeline is running on GCP dataproc cluster machine.
 
-#### Dataproc Jobs:
+## Dashboard
 
-* Dataproc Job 1: This is web to cloud storage script. Fetches data from web, turns pyspark dataframe and transform necessary changes
-* Dataproc Job 2: This is process script. Takes all data from cloud storage, process data and saves to cloud storage.
-* Dataproc Job 3: This is transform script. Takes processed data from cloud storage and transform data for reporting and saves to bigquery.
+
+![Diagram](./img/dashboard1.png)
+![Diagram](./img/dashboard2.png)

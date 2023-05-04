@@ -1,2 +1,0 @@
-core:fs.gs.glob.flatlist.enable=false
-core:fs.gs.glob.concurrent.enable=false

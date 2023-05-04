@@ -9,18 +9,18 @@ api ?= $(shell bash -c 'read -p "api: " api; echo $$api')
 install:
 	pip install prefect
 	pip install prefect-gcp
-	pip install google.cloud
+	pip install google-cloud-dataproc
 
 
 prepare:
-	echo -e "Create prefect Credentials block. Block name must "gcp-creds"
+	echo -e "Create prefect Credentials block. Block name must "gcp-creds""
 	prefect block create gcp-credentials
 	echo "pip install googlemaps">init_script.sh
 	echo "pip install prefect">>init_script.sh
 	echo "pip install prefect-gcp">>init_script.sh
 	echo "pip install prefect-gcp['cloud_storage']">>init_script.sh
 	echo "prefect cloud login --key $(prefect_key) --workspace $(prefect_workspace)">>init_script.sh
-	echo "echo "export API=${api}" | tee -a /etc/profile">>init_script.sh
+	echo "echo "export API=$(api)" | tee -a /etc/profile">>init_script.sh
 	echo "source /etc/profile">>init_script.sh
 
 terraform:
