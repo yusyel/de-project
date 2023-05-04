@@ -30,7 +30,7 @@ Here is processed data:
 
 ## Transforming of Data
 
-For transforming data I created 5 dataframe. Transformed and processed data was saved to bigquery. Processed data was partitioned on a monthly basis.
+For transforming data I created 2 dataframe. Transformed and processed data was saved to bigquery. Processed data was partitioned on a monthly basis.
 
 Average dataframe: With this dataframe I grouped coordinates, hour, month and year columns. While grouping calculated average of all numeric variables for each group. Hours, months and years can be visualized as time series for each location.
 
@@ -42,7 +42,7 @@ District dataframe: With this dataframe I grouped district, year and month colum
 ### Dataproc Jobs:
 
 * Dataproc Job 1: This is web to cloud storage script. Fetches data from web, turns pyspark dataframe and transform necessary changes
-* Dataproc Job 2: This is process script. Takes all data from cloud storage, process data and saves to cloud storage.
+* Dataproc Job 2: This is process script. Takes all data from cloud storage, processes data and saves to cloud storage.
 * Dataproc Job 3: This is transform script. Takes processed data from cloud storage and transform data for reporting and saves to bigquery.
 
 ## Technology Stack:
