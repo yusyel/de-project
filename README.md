@@ -16,7 +16,7 @@ Here is raw data sample:
 
 ## Processing of Data
 
-For processing data I've extracted hours, month  and year information from timestamp column and saved as individuals columns. Google looker studio accept geographic locations with "(latitude, longitude)" as format. I've concatenated latitude and logitude columns. Unfortunately data source does not provide geohash counterparts. For getting locations address I used google maps python library and saved location addresses another column. Istanbul has 39 district. For comparing each district I've extracted district information from address column. With processed data I can compare each hour, each month for 3 year.
+For processing data I've extracted hours, month  and year information from timestamp column and saved as individual columns. Google looker studio accept geographic locations with "(latitude, longitude)" as format. I've concatenated latitude and logitude columns. Unfortunately data source does not provide geohash counterparts. For getting locations address I used google maps python library and saved location addresses another column. Istanbul has 39 district. For comparing each district I've extracted district information from address column. With processed data I can compare each hour, each month for 3 year.
 
 Here is processed data:
 
