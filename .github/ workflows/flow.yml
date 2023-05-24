@@ -1,5 +1,10 @@
 name: Flow
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
+
+
 env:
   PREFECT_ID: ${{env.PREFECT_ID}}
   PREFECT_NAME: ${{env.PREFECT_NAME}}
