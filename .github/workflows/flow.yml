@@ -1,10 +1,5 @@
 name: Flow
-on:
-  push:
-    branches:
-      - 'dev'
-    paths:
-      - './*'
+on: [push]
 
 env:
   PREFECT_ID: ${{ secrets.PREFECT_ID }}
