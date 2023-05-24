@@ -2,7 +2,7 @@ name: Flow
 on: [push]
 
 env:
-  PREFECT_ID: ${{ secrets.PREFECT_ID }}
+  PREFECT_KEY: ${{ secrets.PREFECT_KEY }}
   PREFECT_NAME: ${{ secrets.PREFECT_NAME }}
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
   PROJECT_REGION: ${{ secrets.PROJECT_REGION }}
@@ -21,7 +21,7 @@ jobs:
         run: pip install pipenv && pipenv install
 
       - name: Login prefect
-        run: pipenv run prefect cloud login --key ${{ env.PREFECT_ID }} --workspace ${{ env.PREFECT_NAME }}
+        run: pipenv run prefect cloud login --key ${{ env.PREFECT_KEY }} --workspace ${{ env.PREFECT_NAME }}
 
       - name: Run flow
         run: pipenv run python flow.py --project_id=${{ env.PROJECT_ID }} --region=${{ env.PROJECT_REGION }}
