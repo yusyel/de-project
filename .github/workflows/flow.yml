@@ -20,8 +20,6 @@ jobs:
       - name: Install dependencies
         run: pip install pipenv && pipenv install
 
-      - name: Login prefect
-        run: pipenv run python prefect cloud login --key ${{env.PROJECT_ID}} --workspace ${{env.PREFECT_NAME}}
 
       - name: Run flow
         run: pipenv run python flow.py --project_id=${{env.PROJECT_ID}} --region=${{env.PROJECT_REGION}}
