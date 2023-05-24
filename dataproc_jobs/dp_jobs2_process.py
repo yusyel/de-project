@@ -19,7 +19,7 @@ def spark_get(project_id: str):
         .config("spark.sql.broadcastTimeout", "36000")
         .getOrCreate()
     )
-    spark.conf.set("temporaryGcsBucket", f"gs://de-project_{project_id}/temp")
+    spark.conf.set("temporaryGcsBucket", f"gs://de-project_{project_id}")
     return spark
 
 

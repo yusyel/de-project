@@ -30,7 +30,7 @@ def spark_session() -> SparkSession:
         .master("local[*]")
         .getOrCreate()
     )
-    spark.conf.set("temporaryGcsBucket", f"gs://de-project_{project_id}temp")
+    spark.conf.set("temporaryGcsBucket", f"gs://de-project_{project_id}")
     return spark
 
 
