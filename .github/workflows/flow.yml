@@ -7,10 +7,10 @@ on:
       - './'
 
 env:
-  PREFECT_ID: ${{secrets.PREFECT_ID}}
-  PREFECT_NAME: ${{secrets.PREFECT_NAME}}
-  PROJECT_ID: ${{secrets.PROJECT_ID}}
-  PROJECT_REGION: ${{secrets.PROJECT_REGION}}
+  PREFECT_ID: ${{ secrets.PREFECT_ID }}
+  PREFECT_NAME: ${{ secrets.PREFECT_NAME }}
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  PROJECT_REGION: ${{ secrets.PROJECT_REGION }}
 
 jobs:
   test:
