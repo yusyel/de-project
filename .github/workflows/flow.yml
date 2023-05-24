@@ -2,15 +2,15 @@ name: Flow
 on:
   pull_request:
     branches:
-      - 'main'
+      - 'dev'
     paths:
-      - './'
+      - './*'
 
 env:
-  PREFECT_ID: ${{env.PREFECT_ID}}
-  PREFECT_NAME: ${{env.PREFECT_NAME}}
-  PROJECT_ID: ${{env.PROJECT_ID}}
-  PROJECT_REGION: ${{env.PROJECT_REGION}}
+  PREFECT_ID: ${{secrets.PREFECT_ID}}
+  PREFECT_NAME: ${{secrets.PREFECT_NAME}}
+  PROJECT_ID: ${{secrets.PROJECT_ID}}
+  PROJECT_REGION: ${{secrets.PROJECT_REGION}}
 
 jobs:
   test:
@@ -23,13 +23,13 @@ jobs:
           python-version: 3.9
 
       - name: Install dependencies
-        working-directory: "./"
+        working-directory: "./*"
         run: pip install pipenv && pipenv install
 
       - name: Login prefect
-        working-directory: "./"
+        working-directory: "./*"
         run: prefect cloud login --key ${{env.PROJECT_ID}} --workspace ${{env.PREFECT_NAME}}
 
       - name: Run flow
-        working-directory: "./"
+        working-directory: "./*"
         run: pipenv run python flow.py --project_id=${{env.PROJECT_ID}} --region=${{env.PROJECT_REGION}}
