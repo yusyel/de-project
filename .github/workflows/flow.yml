@@ -23,13 +23,13 @@ jobs:
           python-version: 3.9
 
       - name: Install dependencies
-        working-directory: "./"
+        working-directory: "./*"
         run: pip install pipenv && pipenv install
 
       - name: Login prefect
-        working-directory: "./"
+        working-directory: "./*"
         run: prefect cloud login --key ${{env.PROJECT_ID}} --workspace ${{env.PREFECT_NAME}}
 
       - name: Run flow
-        working-directory: "./"
+        working-directory: "./*"
         run: pipenv run python flow.py --project_id=${{env.PROJECT_ID}} --region=${{env.PROJECT_REGION}}
